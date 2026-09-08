@@ -1,0 +1,52 @@
+# Cline Rules - Auto-approve safe read-only commands
+# File ini mengizinkan auto-approve untuk command pembacaan aman
+
+## Auto-approve commands (read-only, safe)
+# File and directory listing
+ls
+find
+pwd
+
+# File reading
+cat
+head
+tail
+less
+more
+
+# Search and filter
+grep
+rg (ripgrep)
+wc
+sort
+uniq
+diff
+
+# Node.js (read-only operations)
+node --version
+npm --version
+npm list
+npm outdated
+npm audit
+
+# Git (read-only operations)
+git status
+git log
+git diff
+git branch
+git remote
+git show
+
+# System info
+which
+echo
+uname
+date
+whoami
+
+# File information
+file
+stat
+du
+df
+tree
