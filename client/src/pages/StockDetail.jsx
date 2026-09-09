@@ -27,22 +27,47 @@ export default function StockDetail() {
   const [selectedRange, setSelectedRange] = useState('1m')
   const [realtimePrice, setRealtimePrice] = useState(null)
   const [historyLoading, setHistoryLoading] = useState(false)
+  const [insightError, setInsightError] = useState(null)
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true)
       setError(null)
       try {
-        const [stockData, historyData, insightData, newsData] = await Promise.all([
+        // Insight & news boleh gagal tanpa merusak halaman utama
+        // (mis. GEMINI_API_KEY belum diisi di server -> 503)
+        const [stockRes, historyRes, insightRes, newsRes] = await Promise.allSettled([
           fetchStockDetail(symbol),
           fetchStockHistory(symbol, selectedRange),
           fetchStockInsight(symbol),
           fetchStockNews(symbol),
         ])
-        setStock(stockData)
-        setHistory(historyData.data || historyData || [])
-        setInsight(insightData)
-        setNews(newsData.articles || newsData || [])
+
+        // Detail saham wajib berhasil, kalau gagal baru tampilkan error page
+        if (stockRes.status === 'rejected') {
+          throw stockRes.reason
+        }
+
+        setStock(stockRes.value)
+        setHistory(
+          historyRes.status === 'fulfilled'
+            ? (historyRes.value.data || historyRes.value || [])
+            : []
+        )
+
+        if (insightRes.status === 'fulfilled') {
+          setInsight(insightRes.value)
+          setInsightError(null)
+        } else {
+          setInsight(null)
+          setInsightError(insightRes.reason?.message || 'AI insight not available.')
+        }
+
+        setNews(
+          newsRes.status === 'fulfilled'
+            ? (newsRes.value.articles || newsRes.value || [])
+            : []
+        )
       } catch (err) {
         setError(err.message)
       } finally {
@@ -173,7 +198,7 @@ export default function StockDetail() {
           )}
         </div>
         <div className="mb-6">
-          <AIInsightCard insight={insight} loading={!insight && !error} />
+          <AIInsightCard insight={insight} loading={loading} error={insightError} />
         </div>
         <div className="bg-base-200 rounded-xl p-6 border border-base-300 mb-6">
           <h2 className="text-lg font-semibold text-white mb-4">Fundamentals</h2>

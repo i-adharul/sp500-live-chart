@@ -1,9 +1,19 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../features/auth/authSlice';
 
 export default function Navbar() {
-  const location = useLocation()
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { token, user } = useSelector((state) => state.auth);
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate('/');
+  };
 
   return (
     <div className="navbar bg-base-200/80 backdrop-blur-md sticky top-0 z-50 border-b border-base-300">
@@ -36,9 +46,52 @@ export default function Navbar() {
                 Stocks
               </Link>
             </li>
+            {token && (
+              <li>
+                <Link
+                  to="/watchlist"
+                  className={`rounded-lg ${isActive('/watchlist') ? 'bg-emerald-500/20 text-emerald-400' : 'text-base-content hover:bg-base-300'}`}
+                >
+                  Watchlist
+                </Link>
+              </li>
+            )}
+            {token ? (
+              <li className="dropdown dropdown-end">
+                <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
+                  <div className="w-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">
+                      {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                </label>
+                <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52 border border-base-300">
+                  <li className="px-3 py-2">
+                    <span className="text-base-content/60 text-sm">{user?.email}</span>
+                  </li>
+                  <div className="divider my-0" />
+                  <li>
+                    <Link to="/watchlist" className="text-base-content">Watchlist</Link>
+                  </li>
+                  <li>
+                    <button onClick={handleLogout} className="text-red-400">Logout</button>
+                  </li>
+                </ul>
+              </li>
+            ) : (
+              <li>
+                <Link
+                  to="/login"
+                  className="rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                >
+                  Login
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>
     </div>
-  )
+  );
 }
+

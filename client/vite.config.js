@@ -5,4 +5,8 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    // Hanya scan root index.html supaya folder "examples" (project latihan) tidak ikut discan
+    entries: 'index.html',
+  },
 })

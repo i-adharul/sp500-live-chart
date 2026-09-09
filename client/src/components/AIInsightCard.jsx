@@ -1,4 +1,4 @@
-export default function AIInsightCard({ insight, loading }) {
+export default function AIInsightCard({ insight, loading, error }) {
   if (loading) {
     return (
       <div className="bg-gradient-to-br from-violet-500/10 to-cyan-500/10 rounded-xl p-6 border border-violet-500/30 animate-pulse">
@@ -11,6 +11,28 @@ export default function AIInsightCard({ insight, loading }) {
           <div className="h-4 w-3/4 bg-violet-500/10 rounded" />
           <div className="h-4 w-5/6 bg-violet-500/10 rounded" />
         </div>
+      </div>
+    )
+  }
+
+  if (error && !insight) {
+    return (
+      <div className="bg-gradient-to-br from-violet-500/10 to-cyan-500/10 rounded-xl p-6 border border-violet-500/30">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="font-semibold text-white">AI Insight</h3>
+            <p className="text-xs text-base-content/50">Powered by AI Analysis</p>
+          </div>
+        </div>
+        <p className="text-sm text-amber-400/90">{error}</p>
+        <p className="text-xs text-base-content/50 mt-2">
+          Insight akan muncul otomatis setelah service AI dikonfigurasi di server.
+        </p>
       </div>
     )
   }

@@ -33,6 +33,11 @@ function errorHandler(err, req, res, next) {
     message = err.message || 'Data not found.';
   }
 
+  if (err.name === 'ServiceUnavailable') {
+    status = 503;
+    message = err.message || 'Service temporarily unavailable.';
+  }
+
   res.status(status).json({ message });
 }
 
