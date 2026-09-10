@@ -28,12 +28,12 @@ export const fetchStockNews = async (symbol) => {
   return data
 }
 
-export const updateProfile = async ({ name, avatar_url }) => {
-  const { data } = await apiClient.put('/auth/me', { name, avatar_url })
-  return data
-}
-
 export const fetchMarketMovers = async () => {
   const { data } = await apiClient.get('/market/movers')
   return data
 }
+
+// updateProfile pindah ke api/auth.js (updateProfileApi) supaya tiap domain
+// punya satu sumber fungsi API. Re-export di sini supaya import lama tetap jalan.
+export { updateProfileApi as updateProfile } from './auth'
+

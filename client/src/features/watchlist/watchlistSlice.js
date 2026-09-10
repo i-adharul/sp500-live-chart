@@ -1,8 +1,14 @@
-import { createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { logout } from '../auth/authSlice';
+import { createSlice } from '@reduxjs/toolkit'
+import {
+  fetchWatchlistApi,
+  addWatchlistApi,
+  removeWatchlistApi,
+} from '../../api/watchlist'
+import { logout } from '../auth/authSlice'
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+// Thunk watchlist (manual currying) memanggil fungsi di api/watchlist.js
+// (apiClient + interceptor token otomatis).
+// 401 (token invalid) -> logout supaya UI menampilkan Login Required.
 
 export const watchlistSlice = createSlice({
   name: 'watchlist',
@@ -12,109 +18,95 @@ export const watchlistSlice = createSlice({
     error: null,
   },
   reducers: {
-    setLoading: (state, action) => {
-      state.loading = action.payload;
+    setLoadingWatchlist: (state, action) => {
+      state.loading = action.payload
     },
-    setError: (state, action) => {
-      state.error = action.payload;
+    setErrorWatchlist: (state, action) => {
+      state.error = action.payload
     },
     setWatchlist: (state, action) => {
-      state.items = action.payload;
+      state.items = action.payload
     },
     addToWatchlist: (state, action) => {
-      state.items.push(action.payload);
+      state.items.push(action.payload)
     },
     removeFromWatchlist: (state, action) => {
-      state.items = state.items.filter((item) => item.stock_id !== action.payload);
+      state.items = state.items.filter((item) => item.stock_id !== action.payload)
     },
   },
-});
+})
 
 export const {
-  setLoading,
-  setError,
+  setLoadingWatchlist,
+  setErrorWatchlist,
   setWatchlist,
   addToWatchlist,
   removeFromWatchlist,
-} = watchlistSlice.actions;
+} = watchlistSlice.actions
 
-export default watchlistSlice.reducer;
+export default watchlistSlice.reducer
 
-const authHeader = () => ({
-  headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
-});
-
-// Async Thunks
+// Async thunks (manual currying: return (dispatch) => {...})
 export function fetchWatchlist() {
   return (dispatch) => {
     async function fetch() {
       try {
-        dispatch(setLoading(true));
-        const { data } = await axios.get(`${baseUrl}/watchlist`, authHeader());
-        dispatch(setWatchlist(data.watchlist));
+        dispatch(setLoadingWatchlist(true))
+        dispatch(setErrorWatchlist(null))
+        const data = await fetchWatchlistApi()
+        dispatch(setWatchlist(data.watchlist || data || []))
       } catch (err) {
-        console.error('fetchWatchlist error:', err);
-        // Token invalid/kadaluarsa -> bersihkan sesi supaya halaman menampilkan Login Required
-        if (err.response?.status === 401) {
-          dispatch(logout());
-        }
-        dispatch(setError(err.response?.data?.message || 'Failed to fetch watchlist'));
+        if (err?.response?.status === 401 || err?.status === 401) dispatch(logout())
+        dispatch(setErrorWatchlist(err.message || 'Failed to fetch watchlist'))
       } finally {
-        dispatch(setLoading(false));
+        dispatch(setLoadingWatchlist(false))
       }
     }
-    fetch();
-  };
+    fetch()
+  }
 }
 
 export function addWatchlist(stockId) {
   return (dispatch) => {
     async function fetch() {
       try {
-        dispatch(setLoading(true));
-        const { data } = await axios.post(
-          `${baseUrl}/watchlist`,
-          { stock_id: stockId },
-          authHeader(),
-        );
-        dispatch(addToWatchlist(data.data));
-        return { success: true };
+        dispatch(setLoadingWatchlist(true))
+        dispatch(setErrorWatchlist(null))
+        const data = await addWatchlistApi(stockId)
+        dispatch(addToWatchlist(data.data || data))
+        return { success: true }
       } catch (err) {
-        console.error('addWatchlist error:', err);
-        if (err.response?.status === 401) {
-          dispatch(logout());
-        }
-        const message = err.response?.data?.message || 'Failed to add to watchlist';
-        dispatch(setError(message));
-        return { success: false, message };
+        if (err?.response?.status === 401 || err?.status === 401) dispatch(logout())
+        const message = err.message || 'Failed to add to watchlist'
+        dispatch(setErrorWatchlist(message))
+        return { success: false, message }
       } finally {
-        dispatch(setLoading(false));
+        dispatch(setLoadingWatchlist(false))
       }
     }
-    return fetch();
-  };
+    return fetch()
+  }
 }
 
 export function removeWatchlist(stockId) {
   return (dispatch) => {
     async function fetch() {
       try {
-        dispatch(setLoading(true));
-        await axios.delete(`${baseUrl}/watchlist/${stockId}`, authHeader());
-        dispatch(removeFromWatchlist(stockId));
-        return { success: true };
+        dispatch(setLoadingWatchlist(true))
+        dispatch(setErrorWatchlist(null))
+        await removeWatchlistApi(stockId)
+        dispatch(removeFromWatchlist(stockId))
+        return { success: true }
       } catch (err) {
-        console.error('removeWatchlist error:', err);
-        if (err.response?.status === 401) {
-          dispatch(logout());
-        }
-        const message = err.response?.data?.message || 'Failed to remove from watchlist';
-        dispatch(setError(message));
-        return { success: false, message };
+        if (err?.response?.status === 401 || err?.status === 401) dispatch(logout())
+        const message = err.message || 'Failed to remove from watchlist'
+        dispatch(setErrorWatchlist(message))
+        return { success: false, message }
       } finally {
-        dispatch(setLoading(false));
+        dispatch(setLoadingWatchlist(false))
       }
     }
-    return fetch();
-  };
+    return fetch()
+  }
 }
+

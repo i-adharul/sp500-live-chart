@@ -1,8 +1,16 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { GoogleLogin } from '@react-oauth/google';
 import { login, register, googleLogin } from '../features/auth/authSlice';
+
+// Pesan toast berdasarkan alasan redirect dari ProtectedRoute
+// (mis. akses langsung ke /watchlist tanpa login).
+const REASON_MESSAGES = {
+  watchlist: 'Please login to view your watchlist.',
+  profile: 'Please login to view your profile.',
+  auth: 'Please login to continue.',
+}
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
@@ -12,7 +20,17 @@ export default function Login() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const { loading, error } = useSelector((state) => state.auth);
+
+  // ProtectedRoute menitipkan { from, reason } lewat location.state.
+  const from = location.state?.from || '/';
+  const reasonMessage = location.state?.reason ? REASON_MESSAGES[location.state.reason] : null;
+
+  const handleAuthSuccess = () => {
+    // Kembali ke halaman asal kalau ada (mis. /watchlist), kalau tidak ke home.
+    navigate(from, { replace: true });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,14 +43,14 @@ export default function Login() {
     }
 
     if (result.success) {
-      navigate('/');
+      handleAuthSuccess();
     }
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
     const result = await dispatch(googleLogin(credentialResponse.credential));
     if (result.success) {
-      navigate('/');
+      handleAuthSuccess();
     }
   };
 
@@ -47,6 +65,15 @@ export default function Login() {
           <h1 className="text-2xl font-bold text-base-content text-center mb-6">
             {isRegister ? 'Create Account' : 'Welcome Back'}
           </h1>
+
+          {reasonMessage && !error && (
+            <div className="alert alert-warning mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span className="text-sm">{reasonMessage}</span>
+            </div>
+          )}
 
           {error && (
             <div className="alert alert-error mb-4">

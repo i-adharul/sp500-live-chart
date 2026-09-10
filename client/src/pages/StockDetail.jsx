@@ -40,9 +40,6 @@ const SMART_DEFAULT_INTERVALS = {
   '5y': ['1d', '1w', '1M'], // 5 tahun: long-term only
 }
 
-// Maksimum candle yang reasonable untuk ditampilkan (5000 = max API)
-const MAX_CANDLES_THRESHOLD = 5000
-
 // Keterangan tiap metric fundamental: artinya & hubungannya dengan metric lain
 const FUNDAMENTAL_INFO = {
   'Market Cap': 'Kapitalisasi pasar: harga saham × jumlah saham beredar = nilai total perusahaan di bursa. Acuan utama ukuran perusahaan (large/mid/small cap) — makin besar biasanya makin stabil & likuid.',

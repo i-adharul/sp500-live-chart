@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Stocks from './pages/Stocks';
 import StockDetail from './pages/StockDetail';
@@ -31,8 +32,10 @@ function App() {
           <Route path="/stocks" element={<Stocks />} />
           <Route path="/stocks/:symbol" element={<StockDetail />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/watchlist" element={<Watchlist />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/watchlist" element={<Watchlist />} />
+            <Route path="/profile" element={<Profile />} />
+          </Route>
         </Routes>
       </div>
     </BrowserRouter>
