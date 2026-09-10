@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMovers } from '../features/stocks/stocksSlice';
 import StockCard from '../components/StockCard';
@@ -72,6 +72,7 @@ export default function Home() {
                     <StockCard
                       key={stock.symbol}
                       stock={{
+                        id: stock.id,
                         symbol: stock.symbol,
                         name: stock.name,
                         sector: stock.sector,
@@ -93,6 +94,7 @@ export default function Home() {
                     <StockCard
                       key={stock.symbol}
                       stock={{
+                        id: stock.id,
                         symbol: stock.symbol,
                         name: stock.name,
                         sector: stock.sector,

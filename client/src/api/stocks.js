@@ -11,10 +11,10 @@ export const fetchStockDetail = async (symbol) => {
   return data
 }
 
-export const fetchStockHistory = async (symbol, range = '1m') => {
-  const { data } = await apiClient.get(`/stocks/${symbol}/history`, {
-    params: { range },
-  })
+export const fetchStockHistory = async (symbol, range = '1m', interval = null) => {
+  const params = { range }
+  if (interval) params.interval = interval
+  const { data } = await apiClient.get(`/stocks/${symbol}/history`, { params })
   return data
 }
 
@@ -25,6 +25,11 @@ export const fetchStockInsight = async (symbol) => {
 
 export const fetchStockNews = async (symbol) => {
   const { data } = await apiClient.get(`/stocks/${symbol}/news`)
+  return data
+}
+
+export const updateProfile = async ({ name, avatar_url }) => {
+  const { data } = await apiClient.put('/auth/me', { name, avatar_url })
   return data
 }
 

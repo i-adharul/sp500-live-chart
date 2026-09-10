@@ -71,7 +71,7 @@ export default function Stocks() {
       <div className="container mx-auto max-w-6xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Stock Screener</h1>
-          <p className="text-base-content/60">Browse and track S&P 500 stocks by sector</p>
+          <p className="text-base-content/60">Browse and track S&P 500 stocks &amp; crypto by sector</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">

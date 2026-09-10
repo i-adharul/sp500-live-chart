@@ -2,6 +2,7 @@ const { Stock, Quote, Candle, News, AiInsight } = require('../models');
 const finnhubService = require('../services/finnhubService');
 const twelveDataService = require('../services/twelveDataService');
 const geminiService = require('../services/geminiService');
+const { isCrypto } = require('../constants/stocks');
 
 class StockController {
   static async getAll(req, res, next) {
@@ -58,6 +59,32 @@ class StockController {
         throw { name: 'NotFound', message: 'Stock not found.' };
       }
 
+      // Enrichment: kalau fundamental masih NULL di DB, ambil dari Finnhub
+      // (sekalian di-update ke DB sebagai cache) tanpa bikin endpoint gagal.
+      // Crypto tidak punya fundamental saham (market cap/P/E dari metric Finnhub
+      // tidak berlaku), jadi skip enrichment untuk simbol crypto.
+      if (
+        !isCrypto(stock.symbol) &&
+        stock.market_cap == null &&
+        stock.pe_ratio == null &&
+        process.env.FINNHUB_API_KEY
+      ) {
+        try {
+          const metrics = await finnhubService.getCompanyMetrics(stock.symbol);
+          if (metrics) {
+            await stock.update({
+              market_cap: metrics.market_cap ?? stock.market_cap,
+              pe_ratio: metrics.pe_ratio ?? stock.pe_ratio,
+              week52_high: metrics.week52_high ?? stock.week52_high,
+              week52_low: metrics.week52_low ?? stock.week52_low,
+              beta: metrics.beta ?? stock.beta,
+            });
+          }
+        } catch (enrichError) {
+          console.error('Fundamental enrichment failed:', enrichError.message);
+        }
+      }
+
       res.status(200).json({
         id: stock.id,
         symbol: stock.symbol,
@@ -94,6 +121,11 @@ class StockController {
       const { symbol } = req.params;
       const { interval = '1day', range = '1m' } = req.query;
 
+      // interval intraday dari client (5m/15m/30m/1h/4h/1d/1w/1M) dipakai
+      // sebagai override ke Twelve Data; kalau tidak dikenal, fallback ke range
+      const VALID_INTERVALS = ['5m', '15m', '30m', '1h', '4h', '1d', '1w', '1M'];
+      const intervalOverride = VALID_INTERVALS.includes(interval) ? interval : null;
+
       const stock = await Stock.findOne({ where: { symbol: symbol.toUpperCase() } });
       if (!stock) {
         throw { name: 'NotFound', message: 'Stock not found.' };
@@ -109,7 +141,16 @@ class StockController {
 
       if (candles.length === 0) {
         try {
-          const twelveDataCandles = await twelveDataService.getTimeSeries(symbol.toUpperCase(), range);
+          // Twelve Data memakai format berbeda untuk crypto: "BTC/USD" bukan "BTC"
+          const tdSymbol = isCrypto(stock.symbol)
+            ? `${stock.symbol.toUpperCase()}/USD`
+            : symbol.toUpperCase();
+
+          const twelveDataCandles = await twelveDataService.getTimeSeries(
+            tdSymbol,
+            range,
+            intervalOverride
+          );
 
           if (twelveDataCandles.length > 0) {
             const candleRecords = twelveDataCandles.map((c) => ({
@@ -179,7 +220,10 @@ class StockController {
           const today = new Date().toISOString().split('T')[0];
           const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-          const finnhubNews = await finnhubService.getCompanyNews(symbol.toUpperCase(), weekAgo, today);
+          // Crypto tidak didukung /company-news -> pakai berita crypto umum
+          const finnhubNews = isCrypto(stock.symbol)
+            ? await finnhubService.getCryptoNews(weekAgo, today)
+            : await finnhubService.getCompanyNews(stock.symbol.toUpperCase(), weekAgo, today);
 
           if (finnhubNews.length > 0) {
             await News.destroy({ where: { stock_id: stock.id } });

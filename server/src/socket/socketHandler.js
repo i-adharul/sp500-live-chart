@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const WebSocket = require('ws');
 const { Stock, Quote } = require('../models');
+const { toFinnhubWsSymbol, fromFinnhubWsSymbol } = require('../constants/stocks');
 
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 const FINNHUB_WS_URL = `wss://ws.finnhub.io?token=${FINNHUB_API_KEY}`;
@@ -20,7 +21,8 @@ const connectFinnhubWS = () => {
   finnhubWs.on('open', () => {
     console.log('[Socket] Connected to Finnhub WebSocket');
     subscribedSymbols.forEach((symbol) => {
-      finnhubWs.send(JSON.stringify({ type: 'subscribe', symbol }));
+      // crypto perlu format Finnhub WS (mis. BTC -> BINANCE:BTCUSDT)
+      finnhubWs.send(JSON.stringify({ type: 'subscribe', symbol: toFinnhubWsSymbol(symbol) }));
     });
   });
 
@@ -29,7 +31,9 @@ const connectFinnhubWS = () => {
       const message = JSON.parse(data.toString());
       if (message.type === 'trade' && message.data) {
         message.data.forEach((trade) => {
-          handleTradeUpdate(trade);
+          // trade.s dari Finnhub bisa "BINANCE:BTCUSDT" -> kembalikan ke room "BTC"
+          const roomSymbol = fromFinnhubWsSymbol(trade.s);
+          handleTradeUpdate({ ...trade, s: roomSymbol });
         });
       }
     } catch (error) {
@@ -117,7 +121,10 @@ const initSocket = (httpServer) => {
         if (!subscribedSymbols.has(upperSymbol)) {
           subscribedSymbols.add(upperSymbol);
           if (finnhubWs && finnhubWs.readyState === WebSocket.OPEN) {
-            finnhubWs.send(JSON.stringify({ type: 'subscribe', symbol: upperSymbol }));
+            finnhubWs.send(JSON.stringify({
+              type: 'subscribe',
+              symbol: toFinnhubWsSymbol(upperSymbol),
+            }));
           }
         }
       }
@@ -157,7 +164,10 @@ const initSocket = (httpServer) => {
           subscribedSymbols.delete(upperSymbol);
 
           if (finnhubWs && finnhubWs.readyState === WebSocket.OPEN) {
-            finnhubWs.send(JSON.stringify({ type: 'unsubscribe', symbol: upperSymbol }));
+            finnhubWs.send(JSON.stringify({
+              type: 'unsubscribe',
+              symbol: toFinnhubWsSymbol(upperSymbol),
+            }));
           }
 
           liveCandles.delete(upperSymbol);
@@ -176,7 +186,10 @@ const initSocket = (httpServer) => {
             subscribedSymbols.delete(symbol);
 
             if (finnhubWs && finnhubWs.readyState === WebSocket.OPEN) {
-              finnhubWs.send(JSON.stringify({ type: 'unsubscribe', symbol }));
+              finnhubWs.send(JSON.stringify({
+                type: 'unsubscribe',
+                symbol: toFinnhubWsSymbol(symbol),
+              }));
             }
 
             liveCandles.delete(symbol);

@@ -4,8 +4,6 @@ import { logout } from '../auth/authSlice';
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
 
-const token = localStorage.getItem('access_token');
-
 export const watchlistSlice = createSlice({
   name: 'watchlist',
   initialState: {

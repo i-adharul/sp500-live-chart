@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../features/auth/authSlice';
 
@@ -70,6 +70,9 @@ export default function Navbar() {
                     <span className="text-base-content/60 text-sm">{user?.email}</span>
                   </li>
                   <div className="divider my-0" />
+                  <li>
+                    <Link to="/profile" className="text-base-content">Profile</Link>
+                  </li>
                   <li>
                     <Link to="/watchlist" className="text-base-content">Watchlist</Link>
                   </li>

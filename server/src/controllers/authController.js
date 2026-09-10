@@ -169,6 +169,40 @@ class AuthController {
     }
   }
 
+  static async updateProfile(req, res, next) {
+    try {
+      const { id } = req.loginInfo;
+      const { name, avatar_url } = req.body;
+
+      const user = await User.findByPk(id);
+      if (!user) {
+        throw { name: 'NotFound', message: 'User not found.' };
+      }
+
+      if (name !== undefined && (!name || !String(name).trim())) {
+        throw { name: 'BadRequest', message: 'Name cannot be empty.' };
+      }
+
+      const updates = {};
+      if (name !== undefined) updates.name = String(name).trim();
+      if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+
+      await user.update(updates);
+
+      res.status(200).json({
+        message: 'Profile updated successfully.',
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          avatar_url: user.avatar_url,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   static async getMe(req, res, next) {
     try {
       const { id } = req.loginInfo;

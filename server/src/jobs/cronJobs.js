@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const { Stock, Quote, Candle, News } = require('../models');
 const finnhubService = require('../services/finnhubService');
 const twelveDataService = require('../services/twelveDataService');
+const { isCrypto } = require('../constants/stocks');
 const { STOCKS } = require('../constants/stocks');
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -13,7 +14,10 @@ const updateQuotesJob = async () => {
   for (let i = 0; i < stocks.length; i++) {
     const stock = stocks[i];
     try {
-      const quoteData = await finnhubService.getQuote(stock.symbol);
+      // Crypto (mis. BTC) tidak ada di Finnhub /quote REST -> pakai Twelve Data /quote
+      const quoteData = isCrypto(stock.symbol)
+        ? await twelveDataService.getCryptoQuote(stock.symbol)
+        : await finnhubService.getQuote(stock.symbol);
 
       await Quote.upsert({
         stock_id: stock.id,
@@ -45,7 +49,9 @@ const updateCandlesJob = async () => {
   for (let i = 0; i < stocks.length; i++) {
     const stock = stocks[i];
     try {
-      const candles = await twelveDataService.getTimeSeries(stock.symbol, '1m');
+      // Crypto butuh format "BTC/USD" di Twelve Data
+      const tsSymbol = isCrypto(stock.symbol) ? `${stock.symbol}/USD` : stock.symbol;
+      const candles = await twelveDataService.getTimeSeries(tsSymbol, '1m');
 
       if (candles.length > 0) {
         const latestCandle = candles[0];
@@ -82,7 +88,10 @@ const updateNewsJob = async () => {
   for (let i = 0; i < stocks.length; i++) {
     const stock = stocks[i];
     try {
-      const newsData = await finnhubService.getCompanyNews(stock.symbol, weekAgo, today);
+      // Crypto tidak didukung endpoint /company-news -> pakai berita crypto umum
+      const newsData = isCrypto(stock.symbol)
+        ? await finnhubService.getCryptoNews(weekAgo, today)
+        : await finnhubService.getCompanyNews(stock.symbol, weekAgo, today);
 
       if (newsData.length > 0) {
         await News.destroy({ where: { stock_id: stock.id } });

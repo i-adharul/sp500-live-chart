@@ -1,11 +1,38 @@
 import { useEffect, useRef, useReducer } from 'react'
-import { createChart, CrosshairMode } from 'lightweight-charts'
+import { createChart, CrosshairMode, CandlestickSeries } from 'lightweight-charts'
+
+function normalizeItem(item) {
+  const rawTime = item?.date || item?.time || item?.datetime
+  if (!rawTime) return null
+  let time
+  if (typeof rawTime === 'number') {
+    time = rawTime
+  } else {
+    const str = String(rawTime).replace('T', ' ')
+    const hasTimePart = / \d{2}:\d{2}/.test(str)
+    if (hasTimePart) {
+      // Intraday: pakai unix timestamp (detik) supaya candle
+      // dalam hari yang sama tidak saling menimpa
+      const parsed = new Date(str.includes('Z') || str.includes('+') ? str : `${str.replace(' ', 'T')}Z`)
+      time = Math.floor(parsed.getTime() / 1000)
+    } else {
+      time = str.slice(0, 10)
+    }
+  }
+  const open = Number(item.open)
+  const high = Number(item.high)
+  const low = Number(item.low)
+  const close = Number(item.close)
+  if ([open, high, low, close].some((v) => v == null || Number.isNaN(v))) return null
+  return { time, open, high, low, close }
+}
 
 function validateChartData(data) {
   if (!data || data.length === 0) return false
-  return data.every(item =>
-    item && (item.date || item.time) && item.open != null && item.high != null && item.low != null && item.close != null
-  )
+  return data.every((item) => {
+    const normalized = normalizeItem(item)
+    return normalized !== null
+  })
 }
 
 function chartReducer(state, action) {
@@ -78,7 +105,7 @@ export default function CandlestickChart({ data, symbol }) {
         },
       })
 
-      const candleSeries = chart.addCandlestickSeries({
+      const candleSeries = chart.addSeries(CandlestickSeries, {
         upColor: '#22c55e',
         downColor: '#ef4444',
         borderUpColor: '#22c55e',
@@ -87,13 +114,14 @@ export default function CandlestickChart({ data, symbol }) {
         wickDownColor: '#ef4444',
       })
 
-      const formattedData = dataRef.current.map((item) => ({
-        time: item.date || item.time,
-        open: item.open,
-        high: item.high,
-        low: item.low,
-        close: item.close,
-      }))
+      const formattedData = dataRef.current
+        .map(normalizeItem)
+        .filter(Boolean)
+        .sort((a, b) =>
+          typeof a.time === 'number' && typeof b.time === 'number'
+            ? a.time - b.time
+            : new Date(a.time) - new Date(b.time)
+        )
 
       candleSeries.setData(formattedData)
       chart.timeScale().fitContent()

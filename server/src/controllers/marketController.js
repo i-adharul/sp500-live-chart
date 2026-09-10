@@ -16,6 +16,7 @@ class MarketController {
       });
 
       const formatMover = (quote) => ({
+        id: quote.Stock ? quote.Stock.id : null,
         symbol: quote.Stock ? quote.Stock.symbol : null,
         name: quote.Stock ? quote.Stock.name : null,
         sector: quote.Stock ? quote.Stock.sector : null,

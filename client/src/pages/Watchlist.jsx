@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router';
 import { fetchWatchlist, removeWatchlist } from '../features/watchlist/watchlistSlice';
-import { logout } from '../features/auth/authSlice';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import PriceChange from '../components/PriceChange';
 import { formatPrice } from '../utils/formatters';

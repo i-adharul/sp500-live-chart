@@ -75,6 +75,48 @@ const STOCKS = [
   { symbol: 'SHW', name: 'The Sherwin-Williams Company', sector: 'Materials' },
   { symbol: 'FCX', name: 'Freeport-McMoRan Inc.', sector: 'Materials' },
   { symbol: 'NEM', name: 'Newmont Corporation', sector: 'Materials' },
+
+  // Crypto (kategori tambahan di luar 11 sektor GICS)
+  { symbol: 'BTC', name: 'Bitcoin', sector: 'Crypto' },
 ];
 
-module.exports = { STOCKS };
+// Translasi simbol untuk aset crypto.
+// - Twelve Data pakai format "BTC/USD" (REST: time_series & quote)
+// - Finnhub WebSocket pakai format "BINANCE:BTCUSDT"
+const CRYPTO_SYMBOLS = {
+  BTC: {
+    twelveDataSymbol: 'BTC/USD',
+    finnhubWsSymbol: 'BINANCE:BTCUSDT',
+  },
+};
+
+const isCrypto = (symbol) =>
+  Object.prototype.hasOwnProperty.call(CRYPTO_SYMBOLS, String(symbol || '').toUpperCase());
+
+const toTwelveDataSymbol = (symbol) => {
+  const upper = String(symbol || '').toUpperCase();
+  return isCrypto(upper) ? CRYPTO_SYMBOLS[upper].twelveDataSymbol : upper;
+};
+
+const toFinnhubWsSymbol = (symbol) => {
+  const upper = String(symbol || '').toUpperCase();
+  return isCrypto(upper) ? CRYPTO_SYMBOLS[upper].finnhubWsSymbol : upper;
+};
+
+// Kebalikan dari toFinnhubWsSymbol: "BINANCE:BTCUSDT" -> "BTC".
+// Simbol saham biasa (contoh "AAPL") dikembalikan apa adanya.
+const fromFinnhubWsSymbol = (wsSymbol) => {
+  const entry = Object.entries(CRYPTO_SYMBOLS).find(
+    ([, conf]) => conf.finnhubWsSymbol === wsSymbol,
+  );
+  return entry ? entry[0] : wsSymbol;
+};
+
+module.exports = {
+  STOCKS,
+  CRYPTO_SYMBOLS,
+  isCrypto,
+  toTwelveDataSymbol,
+  toFinnhubWsSymbol,
+  fromFinnhubWsSymbol,
+};

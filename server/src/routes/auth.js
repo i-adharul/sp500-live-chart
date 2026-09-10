@@ -7,5 +7,6 @@ router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 router.post('/google', AuthController.googleLogin);
 router.get('/me', authentication, AuthController.getMe);
+router.put('/me', authentication, AuthController.updateProfile);
 
 module.exports = router;

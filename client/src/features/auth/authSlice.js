@@ -90,6 +90,28 @@ export function register(name, email, password) {
   };
 }
 
+export function updateProfile(name, avatarUrl) {
+  return async (dispatch) => {
+    try {
+      dispatch(setLoading(true));
+      const { data } = await axios.put(
+        `${baseUrl}/auth/me`,
+        { name, avatar_url: avatarUrl },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` } }
+      );
+      localStorage.setItem('user', JSON.stringify(data.user));
+      dispatch(setAuth({ token: localStorage.getItem('access_token'), user: data.user }));
+      return { success: true, user: data.user };
+    } catch (err) {
+      const message = err.response?.data?.message || 'Failed to update profile';
+      dispatch(setError(message));
+      return { success: false, message };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+}
+
 export function googleLogin(idToken) {
   return (dispatch) => {
     async function fetch() {

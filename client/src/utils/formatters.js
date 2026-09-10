@@ -59,4 +59,5 @@ export const SECTORS = [
   'Utilities',
   'Real Estate',
   'Materials',
+  'Crypto', // kategori tambahan di luar 11 sektor GICS (mis. BTC)
 ]

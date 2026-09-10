@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { formatPrice } from '../utils/formatters'
 import PriceChange from './PriceChange'
+import WatchlistStarButton from './WatchlistStarButton'
 
 export default function StockCard({ stock, realtimePrice }) {
   const [flash, setFlash] = useState(null)
   const prevPriceRef = useRef(realtimePrice)
   const price = realtimePrice ?? stock.price
-  const change = realtimePrice
+  const change = realtimePrice && stock.previousClose
     ? ((realtimePrice - stock.previousClose) / stock.previousClose) * 100
     : stock.change
 
@@ -43,6 +44,7 @@ export default function StockCard({ stock, realtimePrice }) {
             <p className="text-xs text-base-content/60 truncate max-w-[120px]">{stock.name}</p>
           </div>
         </div>
+        <WatchlistStarButton stockId={stock.id} symbol={stock.symbol} />
       </div>
       <div className="flex items-end justify-between">
         <div className="text-left">
@@ -53,6 +55,9 @@ export default function StockCard({ stock, realtimePrice }) {
         </div>
         <PriceChange value={change} />
       </div>
+      <p className="text-[10px] text-base-content/40 mt-2 text-right">
+        {realtimePrice != null ? 'live vs prev. close' : 'vs prev. close'}
+      </p>
     </Link>
   )
 }
