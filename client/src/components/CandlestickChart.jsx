@@ -44,21 +44,31 @@ function chartReducer(state, action) {
   }
 }
 
-export default function CandlestickChart({ data, symbol }) {
+function toBars(data) {
+  return (data || [])
+    .map(normalizeItem)
+    .filter(Boolean)
+    .sort((a, b) =>
+      typeof a.time === 'number' && typeof b.time === 'number'
+        ? a.time - b.time
+        : new Date(a.time) - new Date(b.time)
+    )
+}
+
+export default function CandlestickChart({ data, symbol, liveCandle }) {
   const chartContainerRef = useRef(null)
   const chartRef = useRef(null)
   const seriesRef = useRef(null)
-  const dataRef = useRef(data)
+  const barsRef = useRef([])
   const [state, dispatch] = useReducer(chartReducer, { hasError: !validateChartData(data) })
 
   useEffect(() => {
-    dataRef.current = data
     dispatch({ type: 'SET_ERROR', payload: !validateChartData(data) })
   }, [data])
 
   useEffect(() => {
     if (state.hasError) return
-    if (!chartContainerRef.current || !dataRef.current || dataRef.current.length === 0) return
+    if (!chartContainerRef.current) return
 
     try {
       if (chartRef.current) {
@@ -114,18 +124,6 @@ export default function CandlestickChart({ data, symbol }) {
         wickDownColor: '#ef4444',
       })
 
-      const formattedData = dataRef.current
-        .map(normalizeItem)
-        .filter(Boolean)
-        .sort((a, b) =>
-          typeof a.time === 'number' && typeof b.time === 'number'
-            ? a.time - b.time
-            : new Date(a.time) - new Date(b.time)
-        )
-
-      candleSeries.setData(formattedData)
-      chart.timeScale().fitContent()
-
       chartRef.current = chart
       seriesRef.current = candleSeries
 
@@ -151,6 +149,56 @@ export default function CandlestickChart({ data, symbol }) {
       console.error('Chart error:', err)
     }
   }, [symbol, state.hasError])
+
+  // setData setiap kali data berubah (ganti range/interval)
+  useEffect(() => {
+    if (state.hasError || !seriesRef.current) return
+    const bars = toBars(data)
+    barsRef.current = bars
+    seriesRef.current.setData(bars)
+    chartRef.current?.timeScale().fitContent()
+  }, [data, state.hasError])
+
+  // live candle: merge data realtime dari Socket.io ke candle terakhir
+  useEffect(() => {
+    if (!liveCandle || !seriesRef.current) return
+    const bars = barsRef.current
+    if (!bars || bars.length === 0) return
+
+    const close = Number(liveCandle.close)
+    if (!Number.isFinite(close)) return
+    const open = Number(liveCandle.open)
+    const high = Number(liveCandle.high)
+    const low = Number(liveCandle.low)
+
+    const last = bars[bars.length - 1]
+    let barTime
+    if (typeof last.time === 'number') {
+      // periode bar = jarak 2 candle terakhir (fallback 60 detik)
+      const period = bars.length > 1 ? Math.max(1, last.time - bars[bars.length - 2].time) : 60
+      const nowSec = Math.floor(Date.now() / 1000)
+      // masih dalam periode bar terakhir -> update bar itu,
+      // sudah lewat -> buat bar baru di tepi kanan chart
+      barTime = nowSec < last.time + period
+        ? last.time
+        : Math.max(last.time, Math.floor(nowSec / period) * period)
+    } else {
+      const today = new Date().toISOString().slice(0, 10)
+      barTime = today > last.time ? today : last.time
+    }
+
+    const target = barTime === last.time
+      ? last
+      : { open: Number.isFinite(open) ? open : close, high: close, low: close }
+
+    seriesRef.current.update({
+      time: barTime,
+      open: target.open,
+      close,
+      high: Math.max(target.high, Number.isFinite(high) ? high : 0, close),
+      low: Math.min(target.low, Number.isFinite(low) ? low : close, close),
+    })
+  }, [liveCandle])
 
   if (state.hasError) {
     return (

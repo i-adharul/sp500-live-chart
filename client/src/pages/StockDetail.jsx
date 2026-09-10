@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router'
 import { fetchStockDetail, fetchStockHistory, fetchStockInsight, fetchStockNews } from '../api/stocks'
 import { formatPrice, formatMarketCap, formatNumber } from '../utils/formatters'
-import { useSocket } from '../hooks/useSocket'
+import { useLiveCandle } from '../hooks/useSocket'
 import PriceChange from '../components/PriceChange'
 import WatchlistStarButton from '../components/WatchlistStarButton'
 import CandlestickChart from '../components/CandlestickChart'
@@ -53,6 +53,7 @@ export default function StockDetail() {
   const [selectedRange, setSelectedRange] = useState('1m')
   const [selectedInterval, setSelectedInterval] = useState(null) // null = pakai range preset
   const [realtimePrice, setRealtimePrice] = useState(null)
+  const [liveCandle, setLiveCandle] = useState(null)
   const [historyLoading, setHistoryLoading] = useState(false)
   const [insightError, setInsightError] = useState(null)
 
@@ -124,10 +125,11 @@ export default function StockDetail() {
     setSelectedInterval(null) // kembali ke preset harian saat ganti range
   }
 
-  useSocket('price-update', (data) => {
-    if (data && data.symbol === symbol && data.price !== undefined) {
-      setRealtimePrice(data.price)
-    }
+  // Socket.io: subscribe 1 simbol saat halaman dibuka, unsubscribe saat ditutup.
+  // Server broadcast 'candle-update' (throttle 1x/detik) berisi o/h/l/c live.
+  useLiveCandle(symbol, (candle) => {
+    setRealtimePrice(candle.close)
+    setLiveCandle(candle)
   })
 
   const quote = stock?.quote
@@ -282,7 +284,7 @@ export default function StockDetail() {
           {historyLoading ? (
             <div className="h-80 bg-base-300 rounded-lg animate-pulse" />
           ) : (
-            <CandlestickChart data={history} symbol={symbol} />
+            <CandlestickChart data={history} symbol={symbol} liveCandle={liveCandle} />
           )}
         </div>
         <div className="mb-6">
