@@ -3,7 +3,7 @@
 // Seeder tambahan untuk aset crypto (kategori di luar 11 sektor GICS).
 // Idempotent: hanya insert simbol yang belum ada, jadi aman dijalankan ulang
 // dan tidak konflik dengan seeder 55 saham S&P 500 yang sudah jalan.
-const { STOCKS } = require('../src/constants/stocks');
+const { STOCKS } = require('../constants/stocks');
 
 module.exports = {
   async up(queryInterface, Sequelize) {

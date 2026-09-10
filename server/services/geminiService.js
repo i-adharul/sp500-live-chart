@@ -60,7 +60,7 @@ const requestInsight = async (stockData) => {
         contents: buildPrompt(stockData),
       });
 
-      const text = response.text;
+      const text = response.text; //string dan ada bungkus markdown "```json\n{\n  \"summary\": \"Saham BBCA  ... bunga BI.\"\n}\n```"
 
       const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       const insight = JSON.parse(cleanedText);

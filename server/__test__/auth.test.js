@@ -2,16 +2,21 @@ const request = require('supertest');
 const app = require('../app');
 const { sequelize } = require('../models');
 const { signToken } = require('../helpers/jwt');
-const { hashPassword } = require('../helpers/bcrypt');
+const { hashPassword, comparePassword } = require('../helpers/bcrypt');
 
 let access_token;
 let testUser;
 
 beforeAll(async () => {
-  // Create test user
+  // Clean up any existing test user
+  await sequelize.models.User.destroy({
+    where: { email: 'test@example.com' },
+  });
+
+  // Create test user - password will be hashed by beforeCreate hook
   testUser = await sequelize.models.User.create({
     email: 'test@example.com',
-    password: hashPassword('password123'),
+    password: 'password123', // Plain password - hook will hash it
     name: 'Test User',
   });
 
@@ -27,6 +32,9 @@ afterAll(async () => {
   // Clean up test data
   await sequelize.models.User.destroy({
     where: { email: 'test@example.com' },
+  });
+  await sequelize.models.User.destroy({
+    where: { email: 'newuser@example.com' },
   });
   await sequelize.models.Stock.destroy({
     where: { symbol: 'TEST' },

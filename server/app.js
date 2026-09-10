@@ -23,18 +23,23 @@ app.use((req, res, next) => {
   next();
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal server error',
-  });
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set('query parser', 'extended');
 
 app.use('/api', router);
 
+// Error handling middleware — registered last so errors thrown by any
+// middleware or route above propagate here instead of Express's default
+// HTML handler. Exported for unit testing.
+function errorHandler(err, req, res, next) {
+  console.error('Server error:', err);
+  res.status(err.status || 500).json({
+    message: err.message || 'Internal server error',
+  });
+}
+
+app.use(errorHandler);
+
 module.exports = app;
+module.exports.errorHandler = errorHandler;

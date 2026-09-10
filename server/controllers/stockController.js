@@ -100,15 +100,15 @@ class StockController {
         beta: stock.beta,
         quote: stock.Quote
           ? {
-              current_price: stock.Quote.current_price,
-              change: stock.Quote.change,
-              change_percent: stock.Quote.change_percent,
-              high: stock.Quote.high,
-              low: stock.Quote.low,
-              open: stock.Quote.open,
-              previous_close: stock.Quote.previous_close,
-              fetched_at: stock.Quote.fetched_at,
-            }
+            current_price: stock.Quote.current_price,
+            change: stock.Quote.change,
+            change_percent: stock.Quote.change_percent,
+            high: stock.Quote.high,
+            low: stock.Quote.low,
+            open: stock.Quote.open,
+            previous_close: stock.Quote.previous_close,
+            fetched_at: stock.Quote.fetched_at,
+          }
           : null,
       });
     } catch (error) {
@@ -134,7 +134,7 @@ class StockController {
       // Hitung tanggal berdasarkan range
       const now = new Date();
       let startDate = new Date();
-      
+
       switch (range) {
         case '1m':
           startDate.setMonth(now.getMonth() - 1);
@@ -316,6 +316,7 @@ class StockController {
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
       const needsRefresh = !insight || insight.generated_at < oneDayAgo;
 
+      //Insight dianggap kedaluwarsa kalau belum pernah dibuat, atau umurnya sudah lebih dari 24 jam.
       if (needsRefresh) {
         try {
           const quote = await Quote.findOne({ where: { stock_id: stock.id } });
