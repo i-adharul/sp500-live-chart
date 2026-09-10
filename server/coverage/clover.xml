@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1789061451562" clover="3.2.0">
-  <project timestamp="1789061451562" name="All files">
+<coverage generated="1789066025839" clover="3.2.0">
+  <project timestamp="1789066025839" name="All files">
     <metrics statements="543" coveredstatements="504" conditionals="296" coveredconditionals="267" methods="71" coveredmethods="67" elements="910" coveredelements="838" complexity="0" loc="543" ncloc="543" packages="8" files="26" classes="26"/>
     <package name="server">
       <metrics statements="20" coveredstatements="20" conditionals="8" coveredconditionals="8" methods="2" coveredmethods="2"/>
@@ -594,26 +594,26 @@
         <line num="56" count="8" type="stmt"/>
         <line num="57" count="15" type="stmt"/>
         <line num="58" count="15" type="stmt"/>
-        <line num="63" count="4" type="stmt"/>
         <line num="65" count="4" type="stmt"/>
-        <line num="66" count="4" type="stmt"/>
+        <line num="67" count="4" type="stmt"/>
         <line num="68" count="4" type="stmt"/>
-        <line num="69" count="4" type="stmt"/>
-        <line num="77" count="11" type="stmt"/>
-        <line num="78" count="11" type="stmt"/>
-        <line num="80" count="11" type="cond" truecount="4" falsecount="0"/>
-        <line num="81" count="2" type="stmt"/>
-        <line num="86" count="2" type="stmt"/>
-        <line num="89" count="25" type="stmt"/>
-        <line num="90" count="9" type="cond" truecount="4" falsecount="0"/>
-        <line num="91" count="1" type="stmt"/>
-        <line num="94" count="8" type="stmt"/>
-        <line num="95" count="8" type="stmt"/>
-        <line num="97" count="4" type="cond" truecount="2" falsecount="0"/>
-        <line num="98" count="1" type="stmt"/>
-        <line num="100" count="3" type="stmt"/>
-        <line num="101" count="3" type="stmt"/>
-        <line num="105" count="25" type="stmt"/>
+        <line num="70" count="4" type="stmt"/>
+        <line num="71" count="4" type="stmt"/>
+        <line num="79" count="11" type="stmt"/>
+        <line num="80" count="11" type="stmt"/>
+        <line num="82" count="11" type="cond" truecount="4" falsecount="0"/>
+        <line num="83" count="2" type="stmt"/>
+        <line num="88" count="2" type="stmt"/>
+        <line num="91" count="25" type="stmt"/>
+        <line num="92" count="9" type="cond" truecount="4" falsecount="0"/>
+        <line num="93" count="1" type="stmt"/>
+        <line num="96" count="8" type="stmt"/>
+        <line num="97" count="8" type="stmt"/>
+        <line num="99" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="100" count="1" type="stmt"/>
+        <line num="102" count="3" type="stmt"/>
+        <line num="103" count="3" type="stmt"/>
+        <line num="107" count="25" type="stmt"/>
       </file>
       <file name="twelveDataService.js" path="/Users/revinaawalia/Downloads/imron-hacktiv8-excercise/phase2/snp-500-ai/server/services/twelveDataService.js">
         <metrics statements="28" coveredstatements="28" conditionals="38" coveredconditionals="38" methods="3" coveredmethods="3"/>

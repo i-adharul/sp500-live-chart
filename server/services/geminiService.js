@@ -55,12 +55,14 @@ const requestInsight = async (stockData) => {
 
   for (const model of candidates) {
     try {
-      const response = await ai.models.generateContent({
+      const response = await ai.interactions.create({
         model,
-        contents: buildPrompt(stockData),
+        input: buildPrompt(stockData),
       });
 
-      const text = response.text; //string dan ada bungkus markdown "```json\n{\n  \"summary\": \"Saham BBCA  ... bunga BI.\"\n}\n```"
+      // Interactions API (baru): convenience property `output_text`.
+      // Teks masih bisa terbungkus markdown ```json ... ```
+      const text = response.output_text;
 
       const cleanedText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       const insight = JSON.parse(cleanedText);

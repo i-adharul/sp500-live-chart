@@ -71,8 +71,10 @@ const handleTradeUpdate = async (trade) => {
     candle.timestamp = timestamp;
   }
 
+  // Throttle 1x/detik per simbol: data candle selalu di-update dari tiap trade,
+  // tapi emit 'candle-update' ke room maksimal sekali per detik.
   if (throttleTimers.has(symbol)) {
-    clearTimeout(throttleTimers.get(symbol));
+    return;
   }
 
   throttleTimers.set(
@@ -90,8 +92,7 @@ const handleTradeUpdate = async (trade) => {
         });
       }
       throttleTimers.delete(symbol);
-    }),
-    1000,
+    }, 1000),
   );
 };
 

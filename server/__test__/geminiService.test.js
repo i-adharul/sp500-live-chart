@@ -3,7 +3,7 @@ const mockGenerateContent = jest.fn();
 
 jest.mock('@google/genai', () => ({
   GoogleGenAI: jest.fn(() => ({
-    models: { generateContent: mockGenerateContent },
+    interactions: { create: mockGenerateContent },
   })),
 }));
 
@@ -48,7 +48,7 @@ describe('geminiService', () => {
   });
 
   test('returns parsed insight for plain JSON response', async () => {
-    mockGenerateContent.mockResolvedValue({ text: JSON.stringify(insightPayload) });
+    mockGenerateContent.mockResolvedValue({ output_text: JSON.stringify(insightPayload) });
     geminiService = loadService();
 
     const result = await geminiService.generateInsight({
@@ -62,13 +62,13 @@ describe('geminiService', () => {
     expect(result).toEqual(insightPayload);
     expect(mockGenerateContent).toHaveBeenCalledTimes(1);
     expect(mockGenerateContent.mock.calls[0][0].model).toBe('gemini-test-model');
-    expect(mockGenerateContent.mock.calls[0][0].contents).toContain('AAPL');
-    expect(mockGenerateContent.mock.calls[0][0].contents).toContain('Apple beats earnings');
+    expect(mockGenerateContent.mock.calls[0][0].input).toContain('AAPL');
+    expect(mockGenerateContent.mock.calls[0][0].input).toContain('Apple beats earnings');
   });
 
   test('strips markdown fences before parsing JSON', async () => {
     mockGenerateContent.mockResolvedValue({
-      text: '```json\n' + JSON.stringify(insightPayload) + '\n```',
+      output_text: '```json\n' + JSON.stringify(insightPayload) + '\n```',
     });
     geminiService = loadService();
 
@@ -80,8 +80,8 @@ describe('geminiService', () => {
     test('retries next model on 404 and caches the active model', async () => {
     mockGenerateContent
       .mockRejectedValueOnce(new Error('models/gemini-test-model is not found (404)'))
-      .mockResolvedValueOnce({ text: JSON.stringify(insightPayload) })
-      .mockResolvedValue({ text: JSON.stringify(insightPayload) });
+      .mockResolvedValueOnce({ output_text: JSON.stringify(insightPayload) })
+      .mockResolvedValue({ output_text: JSON.stringify(insightPayload) });
     geminiService = loadService();
 
     const result = await geminiService.generateInsight({ symbol: 'AAPL' });
