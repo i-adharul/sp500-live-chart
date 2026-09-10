@@ -131,14 +131,41 @@ class StockController {
         throw { name: 'NotFound', message: 'Stock not found.' };
       }
 
+      // Hitung tanggal berdasarkan range
+      const now = new Date();
+      let startDate = new Date();
+      
+      switch (range) {
+        case '1m':
+          startDate.setMonth(now.getMonth() - 1);
+          break;
+        case '3m':
+          startDate.setMonth(now.getMonth() - 3);
+          break;
+        case '1y':
+          startDate.setFullYear(now.getFullYear() - 1);
+          break;
+        case '5y':
+          startDate.setFullYear(now.getFullYear() - 5);
+          break;
+        default:
+          startDate.setMonth(now.getMonth() - 1);
+      }
+
+      const { Op } = require('sequelize');
+
       let candles = await Candle.findAll({
         where: {
           stock_id: stock.id,
           interval,
+          datetime: {
+            [Op.gte]: startDate,
+          },
         },
         order: [['datetime', 'ASC']],
       });
 
+      // Jika data di database kurang dari yang diminta, fetch dari API
       if (candles.length === 0) {
         try {
           // Twelve Data memakai format berbeda untuk crypto: "BTC/USD" bukan "BTC"
@@ -168,10 +195,14 @@ class StockController {
               ignoreDuplicates: true,
             });
 
+            // Ambil lagi dari database dengan filter tanggal
             candles = await Candle.findAll({
               where: {
                 stock_id: stock.id,
                 interval,
+                datetime: {
+                  [Op.gte]: startDate,
+                },
               },
               order: [['datetime', 'ASC']],
             });

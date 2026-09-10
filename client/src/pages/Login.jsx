@@ -43,8 +43,8 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-base-200 rounded-xl p-8 border border-base-300">
-          <h1 className="text-2xl font-bold text-white text-center mb-6">
+        <div className="bg-base-100 rounded-xl p-8 border border-base-300 shadow-lg">
+          <h1 className="text-2xl font-bold text-base-content text-center mb-6">
             {isRegister ? 'Create Account' : 'Welcome Back'}
           </h1>
 
@@ -64,7 +64,7 @@ export default function Login() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="input input-bordered w-full bg-base-300 border-base-300 text-white"
+                  className="input input-bordered w-full bg-base-200 border-base-300 text-base-content"
                   placeholder="Your name"
                   required
                 />
@@ -79,7 +79,7 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input input-bordered w-full bg-base-300 border-base-300 text-white"
+                className="input input-bordered w-full bg-base-200 border-base-300 text-base-content"
                 placeholder="your@email.com"
                 required
               />
@@ -93,7 +93,7 @@ export default function Login() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="input input-bordered w-full bg-base-300 border-base-300 text-white"
+                className="input input-bordered w-full bg-base-200 border-base-300 text-base-content"
                 placeholder="Min. 5 characters"
                 required
                 minLength={5}
@@ -102,7 +102,7 @@ export default function Login() {
 
             <button
               type="submit"
-              className="btn btn-primary w-full bg-gradient-to-r from-emerald-500 to-cyan-500 border-0"
+              className="btn btn-primary w-full bg-gradient-to-r from-emerald-500 to-cyan-500 border-0 text-white"
               disabled={loading}
             >
               {loading ? (
@@ -117,14 +117,14 @@ export default function Login() {
 
           <div className="divider text-base-content/40 my-6">OR</div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center w-full">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
-              theme="filled_black"
+              theme="outline"
               shape="pill"
               text="continue_with"
-              width="100%"
+              width={320}
             />
           </div>
 
@@ -132,7 +132,7 @@ export default function Login() {
             {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
             <button
               onClick={() => setIsRegister(!isRegister)}
-              className="text-emerald-400 hover:underline"
+              className="text-emerald-600 hover:underline"
             >
               {isRegister ? 'Login' : 'Register'}
             </button>

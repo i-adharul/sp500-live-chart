@@ -8,7 +8,10 @@ export default function Navbar() {
   const dispatch = useDispatch();
   const { token, user } = useSelector((state) => state.auth);
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
+  };
 
   const handleLogout = () => {
     dispatch(logout());
@@ -25,7 +28,7 @@ export default function Navbar() {
                 <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
               </svg>
             </div>
-            <span className="text-xl font-bold text-white">S&P 500 AI</span>
+            <span className="text-xl font-bold text-base-content">S&P 500 AI</span>
           </Link>
         </div>
         <div className="flex-none">
@@ -33,7 +36,7 @@ export default function Navbar() {
             <li>
               <Link
                 to="/"
-                className={`rounded-lg ${isActive('/') ? 'bg-emerald-500/20 text-emerald-400' : 'text-base-content hover:bg-base-300'}`}
+                className={`rounded-lg ${isActive('/') ? 'bg-emerald-500/20 text-emerald-600' : 'text-base-content hover:bg-base-300'}`}
               >
                 Home
               </Link>
@@ -41,7 +44,7 @@ export default function Navbar() {
             <li>
               <Link
                 to="/stocks"
-                className={`rounded-lg ${isActive('/stocks') ? 'bg-emerald-500/20 text-emerald-400' : 'text-base-content hover:bg-base-300'}`}
+                className={`rounded-lg ${isActive('/stocks') ? 'bg-emerald-500/20 text-emerald-600' : 'text-base-content hover:bg-base-300'}`}
               >
                 Stocks
               </Link>
@@ -50,7 +53,7 @@ export default function Navbar() {
               <li>
                 <Link
                   to="/watchlist"
-                  className={`rounded-lg ${isActive('/watchlist') ? 'bg-emerald-500/20 text-emerald-400' : 'text-base-content hover:bg-base-300'}`}
+                  className={`rounded-lg ${isActive('/watchlist') ? 'bg-emerald-500/20 text-emerald-600' : 'text-base-content hover:bg-base-300'}`}
                 >
                   Watchlist
                 </Link>
@@ -65,7 +68,7 @@ export default function Navbar() {
                     </span>
                   </div>
                 </label>
-                <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52 border border-base-300">
+                <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52 border border-base-300">
                   <li className="px-3 py-2">
                     <span className="text-base-content/60 text-sm">{user?.email}</span>
                   </li>
@@ -77,7 +80,7 @@ export default function Navbar() {
                     <Link to="/watchlist" className="text-base-content">Watchlist</Link>
                   </li>
                   <li>
-                    <button onClick={handleLogout} className="text-red-400">Logout</button>
+                    <button onClick={handleLogout} className="text-red-500">Logout</button>
                   </li>
                 </ul>
               </li>
@@ -85,7 +88,11 @@ export default function Navbar() {
               <li>
                 <Link
                   to="/login"
-                  className="rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                  className={`rounded-lg ${
+                    isActive('/login')
+                      ? 'bg-emerald-500/20 text-emerald-600'
+                      : 'text-base-content hover:bg-base-300'
+                  }`}
                 >
                   Login
                 </Link>

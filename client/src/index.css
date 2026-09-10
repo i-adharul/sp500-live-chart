@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: dark --default;
+  themes: light --default;
 }
 
 @layer base {
@@ -41,5 +41,26 @@
 
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(100, 116, 139, 0.5);
+  }
+
+  /* Light theme overrides - convert dark-theme colors to light */
+  .text-white {
+    color: #1f2937 !important; /* gray-800 */
+  }
+
+  .text-emerald-400 {
+    color: #059669 !important; /* emerald-600 */
+  }
+
+  .text-amber-400\/90 {
+    color: #d97706 !important; /* amber-600 */
+  }
+
+  .text-violet-400 {
+    color: #7c3aed !important; /* violet-600 */
+  }
+
+  .text-red-400 {
+    color: #dc2626 !important; /* red-600 */
   }
 }

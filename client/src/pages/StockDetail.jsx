@@ -11,24 +11,37 @@ import NewsListItem from '../components/NewsListItem'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 import ErrorState from '../components/ErrorState'
 
+// Range options dengan informasi candle yang lebih jelas
 const RANGE_OPTIONS = [
-  { value: '1m', label: '1 Bulan' },
-  { value: '3m', label: '3 Bulan' },
-  { value: '1y', label: '1 Tahun' },
+  { value: '1m', label: '1 Bulan', defaultInterval: '1d', candleInfo: '~252 hari trading' },
+  { value: '3m', label: '3 Bulan', defaultInterval: '1d', candleInfo: '~63 hari trading' },
+  { value: '1y', label: '1 Tahun', defaultInterval: '1d', candleInfo: '~252 hari trading' },
+  { value: '5y', label: '5 Tahun', defaultInterval: '1d', candleInfo: '~1260 hari trading' },
 ]
 
 // Interval candle: per berapa lama 1 candle dibentuk.
 // 5m/15m/30m/1h/4h = intraday, 1d/1w/1M = harian/mingguan/bulanan.
 const INTERVAL_OPTIONS = [
-  { value: '5m', label: '5m' },
-  { value: '15m', label: '15m' },
-  { value: '30m', label: '30m' },
-  { value: '1h', label: '1h' },
-  { value: '4h', label: '4h' },
-  { value: '1d', label: '1d' },
-  { value: '1w', label: '1w' },
-  { value: '1M', label: '1M' },
+  { value: '5m', label: '5 menit', type: 'intraday' },
+  { value: '15m', label: '15 menit', type: 'intraday' },
+  { value: '30m', label: '30 menit', type: 'intraday' },
+  { value: '1h', label: '1 jam', type: 'intraday' },
+  { value: '4h', label: '4 jam', type: 'intraday' },
+  { value: '1d', label: '1 hari', type: 'daily' },
+  { value: '1w', label: '1 minggu', type: 'weekly' },
+  { value: '1M', label: '1 bulan', type: 'monthly' },
 ]
+
+// Smart defaults: interval yang direkomendasikan berdasarkan range
+const SMART_DEFAULT_INTERVALS = {
+  '1m': ['5m', '15m', '30m', '1h', '1d'], // 1 bulan: fokus intraday
+  '3m': ['1h', '4h', '1d', '1w'], // 3 bulan: mid-term
+  '1y': ['1d', '1w', '1M'], // 1 tahun: long-term only
+  '5y': ['1d', '1w', '1M'], // 5 tahun: long-term only
+}
+
+// Maksimum candle yang reasonable untuk ditampilkan (5000 = max API)
+const MAX_CANDLES_THRESHOLD = 5000
 
 // Keterangan tiap metric fundamental: artinya & hubungannya dengan metric lain
 const FUNDAMENTAL_INFO = {
@@ -122,8 +135,28 @@ export default function StockDetail() {
 
   const handleRangeChange = (value) => {
     setSelectedRange(value)
-    setSelectedInterval(null) // kembali ke preset harian saat ganti range
+    // Reset ke default interval saat ganti range
+    setSelectedInterval(null)
   }
+
+  const handleIntervalChange = (value) => {
+    setSelectedInterval(value)
+  }
+
+  // Fungsi untuk mengecek apakah interval harus disabled berdasarkan range
+  const isIntervalDisabled = (intervalValue) => {
+    const allowedIntervals = SMART_DEFAULT_INTERVALS[selectedRange]
+    return !allowedIntervals.includes(intervalValue)
+  }
+
+  // Get effective interval: jika selectedInterval null, gunakan default dari range
+  const getEffectiveInterval = () => {
+    if (selectedInterval) return selectedInterval
+    const rangeConfig = RANGE_OPTIONS.find(r => r.value === selectedRange)
+    return rangeConfig?.defaultInterval || '1d'
+  }
+
+  const effectiveInterval = getEffectiveInterval()
 
   // Socket.io: subscribe 1 simbol saat halaman dibuka, unsubscribe saat ditutup.
   // Server broadcast 'candle-update' (throttle 1x/detik) berisi o/h/l/c live.
@@ -264,20 +297,60 @@ export default function StockDetail() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-white">Price Chart</h2>
             <div className="flex flex-wrap items-center gap-2">
+              {/* Range Selector */}
               <div className="flex gap-1 bg-base-300 rounded-lg p-1">
                 {RANGE_OPTIONS.map((opt) => (
-                  <button key={opt.value} onClick={() => handleRangeChange(opt.value)} className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${selectedRange === opt.value && !selectedInterval ? 'bg-emerald-500/20 text-emerald-400' : 'text-base-content/50 hover:text-white'}`}>
+                  <button 
+                    key={opt.value} 
+                    onClick={() => handleRangeChange(opt.value)} 
+                    className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      selectedRange === opt.value 
+                        ? 'bg-emerald-500/20 text-emerald-400' 
+                        : 'text-base-content/50 hover:text-white'
+                    }`}
+                  >
                     {opt.label}
                   </button>
                 ))}
               </div>
               <span className="text-xs text-base-content/40">Candle:</span>
-              <div className="flex gap-1 bg-base-300 rounded-lg p-1">
-                {INTERVAL_OPTIONS.map((opt) => (
-                  <button key={opt.value} onClick={() => setSelectedInterval(opt.value)} className={`px-2 py-1 rounded-md text-xs font-mono font-medium transition-colors ${selectedInterval === opt.value ? 'bg-emerald-500/20 text-emerald-400' : 'text-base-content/50 hover:text-white'}`}>
-                    {opt.label}
-                  </button>
-                ))}
+              
+              {/* Interval Selector */}
+              <div className="flex gap-1 bg-base-300 rounded-lg p-1 flex-wrap">
+                {INTERVAL_OPTIONS.map((opt) => {
+                  const isDisabled = isIntervalDisabled(opt.value)
+                  return (
+                    <button 
+                      key={opt.value} 
+                      onClick={() => !isDisabled && handleIntervalChange(opt.value)}
+                      disabled={isDisabled}
+                      className={`px-2 py-1 rounded-md text-xs font-mono font-medium transition-colors ${
+                        isDisabled 
+                          ? 'text-base-content/20 cursor-not-allowed' 
+                          : effectiveInterval === opt.value 
+                            ? 'bg-emerald-500/20 text-emerald-400' 
+                            : 'text-base-content/50 hover:text-white'
+                      }`}
+                      title={isDisabled ? `Tidak tersedia untuk range ${selectedRange}` : opt.label}
+                    >
+                      {opt.label}
+                    </button>
+                  )
+                })}
+              </div>
+              
+              {/* Info tentang candle yang ditampilkan */}
+              <div className="text-xs text-base-content/40">
+                <span>
+                  {INTERVAL_OPTIONS.find(opt => opt.value === effectiveInterval)?.label} • {' '}
+                  {!historyLoading && history.length > 0 
+                    ? `${history.length} candle`
+                    : selectedRange === '1m' ? '~252 candle' : 
+                      selectedRange === '3m' ? '~63 candle' : 
+                      selectedRange === '5y' ? '~1260 candle' :
+                      '~252 candle'
+                  }
+                </span>
               </div>
             </div>
           </div>

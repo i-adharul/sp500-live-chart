@@ -4,6 +4,7 @@ const { User } = require('../models');
 const { OAuth2Client } = require('google-auth-library');
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+console.log('GOOGLE_CLIENT_ID loaded:', GOOGLE_CLIENT_ID ? 'YES' : 'NO');
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
 class AuthController {

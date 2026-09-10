@@ -9,22 +9,25 @@ const twelveDataClient = axios.create({
   timeout: 15000,
 });
 
+// Maksimalkan outputsize sampai 5000 (max API) untuk data lebih lengkap
+// Berdasarkan dokumentasi: 1 request = 1 credit, max 5000 data point
 const TIME_SERIES_INTERVAL_MAP = {
-  '1m': { interval: '1day', outputsize: 30 },
-  '3m': { interval: '1day', outputsize: 90 },
-  '1y': { interval: '1day', outputsize: 365 },
+  '1m': { interval: '1day', outputsize: 252 },      // ~1 tahun hari trading
+  '3m': { interval: '1day', outputsize: 5000 },      // Max: ~20 tahun data harian
+  '1y': { interval: '1day', outputsize: 5000 },      // Max: ~20 tahun data harian
+  '5y': { interval: '1day', outputsize: 5000 },      // Max: ~20 tahun data harian
 };
 
 // Interval langsung dari client: 5m, 15m, 30m, 1h, 4h, 1d, 1w, 1M
 const CLIENT_INTERVAL_MAP = {
-  '5m': { interval: '5min', outputsize: 200 },
-  '15m': { interval: '15min', outputsize: 200 },
-  '30m': { interval: '30min', outputsize: 200 },
-  '1h': { interval: '1h', outputsize: 200 },
-  '4h': { interval: '4h', outputsize: 200 },
-  '1d': { interval: '1day', outputsize: 120 },
-  '1w': { interval: '1week', outputsize: 120 },
-  '1M': { interval: '1month', outputsize: 120 },
+  '5m': { interval: '5min', outputsize: 5000 },      // ~2 minggu data 5-min
+  '15m': { interval: '15min', outputsize: 5000 },    // ~2 bulan data 15-min
+  '30m': { interval: '30min', outputsize: 5000 },    // ~3 bulan data 30-min
+  '1h': { interval: '1h', outputsize: 5000 },        // ~7 bulan data 1-jam
+  '4h': { interval: '4h', outputsize: 5000 },        // ~2.2 tahun data 4-jam
+  '1d': { interval: '1day', outputsize: 5000 },      // ~20 tahun data harian
+  '1w': { interval: '1week', outputsize: 5000 },     // ~96 tahun data mingguan
+  '1M': { interval: '1month', outputsize: 5000 },    // ~416 tahun data bulanan
 };
 
 const getTimeSeries = async (symbol, range = '1m', intervalOverride = null) => {

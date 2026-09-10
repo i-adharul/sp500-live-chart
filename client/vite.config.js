@@ -9,4 +9,10 @@ export default defineConfig({
     // Hanya scan root index.html supaya folder "examples" (project latihan) tidak ikut discan
     entries: 'index.html',
   },
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'unsafe-none',
+      'Cross-Origin-Embedder-Policy': 'unsafe-none',
+    },
+  },
 })
