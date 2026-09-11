@@ -1,20 +1,20 @@
-import { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { updateProfile } from '../features/auth/authSlice'
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { updateProfile } from "../features/auth/authSlice";
 
 export default function Profile() {
-  const dispatch = useDispatch()
-  const { user, loading, error } = useSelector((state) => state.auth)
-  const [name, setName] = useState(user?.name || '')
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '')
-  const [success, setSuccess] = useState(false)
+  const dispatch = useDispatch();
+  const { user, loading, error } = useSelector((state) => state.auth);
+  const [name, setName] = useState(user?.name || "");
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || "");
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setSuccess(false)
-    const result = await dispatch(updateProfile(name, avatarUrl))
-    if (result.success) setSuccess(true)
-  }
+    e.preventDefault();
+    setSuccess(false);
+    const result = await dispatch(updateProfile(name, avatarUrl));
+    if (result.success) setSuccess(true);
+  };
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -22,11 +22,15 @@ export default function Profile() {
       <div className="bg-base-200 rounded-xl p-6 border border-base-300">
         <div className="flex items-center gap-4 mb-6">
           {user?.avatar_url ? (
-            <img src={user.avatar_url} alt={user?.name} className="w-16 h-16 rounded-full object-cover" />
+            <img
+              src={user.avatar_url}
+              alt={user?.name}
+              className="w-16 h-16 rounded-full object-cover"
+            />
           ) : (
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-linear-to-br from-emerald-400 to-cyan-500 flex items-center justify-center">
               <span className="text-white text-xl font-bold">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                {user?.name?.charAt(0)?.toUpperCase() || "U"}
               </span>
             </div>
           )}
@@ -38,7 +42,9 @@ export default function Profile() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="label text-sm text-base-content/70 mb-1 block">Name</label>
+            <label className="label text-sm text-base-content/70 mb-1 block">
+              Name
+            </label>
             <input
               type="text"
               value={name}
@@ -49,7 +55,9 @@ export default function Profile() {
             />
           </div>
           <div>
-            <label className="label text-sm text-base-content/70 mb-1 block">Avatar URL</label>
+            <label className="label text-sm text-base-content/70 mb-1 block">
+              Avatar URL
+            </label>
             <input
               type="url"
               value={avatarUrl}
@@ -60,13 +68,25 @@ export default function Profile() {
           </div>
 
           {error && <p className="text-sm text-red-400">{error}</p>}
-          {success && <p className="text-sm text-emerald-400">Profile updated successfully.</p>}
+          {success && (
+            <p className="text-sm text-emerald-400">
+              Profile updated successfully.
+            </p>
+          )}
 
-          <button type="submit" className="btn bg-emerald-500 hover:bg-emerald-600 text-white border-none" disabled={loading}>
-            {loading ? <span className="loading loading-spinner loading-sm" /> : 'Save Changes'}
+          <button
+            type="submit"
+            className="btn bg-emerald-500 hover:bg-emerald-600 text-white border-none"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              "Save Changes"
+            )}
           </button>
         </form>
       </div>
     </div>
-  )
+  );
 }

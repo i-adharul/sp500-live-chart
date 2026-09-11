@@ -1,22 +1,22 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router';
-import { useDispatch, useSelector } from 'react-redux';
-import { GoogleLogin } from '@react-oauth/google';
-import { login, register, googleLogin } from '../features/auth/authSlice';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
+import { GoogleLogin } from "@react-oauth/google";
+import { login, register, googleLogin } from "../features/auth/authSlice";
 
 // Pesan toast berdasarkan alasan redirect dari ProtectedRoute
 // (mis. akses langsung ke /watchlist tanpa login).
 const REASON_MESSAGES = {
-  watchlist: 'Please login to view your watchlist.',
-  profile: 'Please login to view your profile.',
-  auth: 'Please login to continue.',
-}
+  watchlist: "Please login to view your watchlist.",
+  profile: "Please login to view your profile.",
+  auth: "Please login to continue.",
+};
 
 export default function Login() {
   const [isRegister, setIsRegister] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -24,8 +24,10 @@ export default function Login() {
   const { loading, error } = useSelector((state) => state.auth);
 
   // ProtectedRoute menitipkan { from, reason } lewat location.state.
-  const from = location.state?.from || '/';
-  const reasonMessage = location.state?.reason ? REASON_MESSAGES[location.state.reason] : null;
+  const from = location.state?.from || "/";
+  const reasonMessage = location.state?.reason
+    ? REASON_MESSAGES[location.state.reason]
+    : null;
 
   const handleAuthSuccess = () => {
     // Kembali ke halaman asal kalau ada (mis. /watchlist), kalau tidak ke home.
@@ -55,7 +57,7 @@ export default function Login() {
   };
 
   const handleGoogleError = () => {
-    console.error('Google Sign In failed');
+    console.error("Google Sign In failed");
   };
 
   return (
@@ -63,13 +65,22 @@ export default function Login() {
       <div className="w-full max-w-md">
         <div className="bg-base-100 rounded-xl p-8 border border-base-300 shadow-lg">
           <h1 className="text-2xl font-bold text-base-content text-center mb-6">
-            {isRegister ? 'Create Account' : 'Welcome Back'}
+            {isRegister ? "Create Account" : "Welcome Back"}
           </h1>
 
           {reasonMessage && !error && (
             <div className="alert alert-warning mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 shrink-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
               </svg>
               <span className="text-sm">{reasonMessage}</span>
             </div>
@@ -114,7 +125,9 @@ export default function Login() {
 
             <div>
               <label className="label">
-                <span className="label-text text-base-content/70">Password</span>
+                <span className="label-text text-base-content/70">
+                  Password
+                </span>
               </label>
               <input
                 type="password"
@@ -129,15 +142,15 @@ export default function Login() {
 
             <button
               type="submit"
-              className="btn btn-primary w-full bg-gradient-to-r from-emerald-500 to-cyan-500 border-0 text-white"
+              className="btn btn-primary w-full bg-linear-to-r from-emerald-500 to-cyan-500 border-0 text-white"
               disabled={loading}
             >
               {loading ? (
                 <span className="loading loading-spinner loading-sm" />
               ) : isRegister ? (
-                'Register'
+                "Register"
               ) : (
-                'Login'
+                "Login"
               )}
             </button>
           </form>
@@ -156,12 +169,12 @@ export default function Login() {
           </div>
 
           <p className="text-center text-base-content/60 mt-6">
-            {isRegister ? 'Already have an account?' : "Don't have an account?"}{' '}
+            {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               onClick={() => setIsRegister(!isRegister)}
               className="text-emerald-600 hover:underline"
             >
-              {isRegister ? 'Login' : 'Register'}
+              {isRegister ? "Login" : "Register"}
             </button>
           </p>
         </div>
