@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import { fetchWatchlist, removeWatchlist } from '../features/watchlist/watchlistSlice';
+import { useSocket } from '../hooks/useSocket';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import PriceChange from '../components/PriceChange';
 import { formatPrice } from '../utils/formatters';
@@ -9,12 +10,23 @@ import { formatPrice } from '../utils/formatters';
 export default function Watchlist() {
   const dispatch = useDispatch();
   const { items, loading, error } = useSelector((state) => state.watchlist);
+  const [realtimePrices, setRealtimePrices] = useState({});
 
   // ProtectedRoute sudah menjamin halaman ini hanya bisa dibuka saat login,
   // jadi tidak perlu lagi cek token / tampilan "Login Required" di sini.
   useEffect(() => {
     dispatch(fetchWatchlist());
   }, [dispatch]);
+
+  // Harga live (broadcast global 'price-update' dari server) untuk tiap baris watchlist.
+  useSocket('price-update', useCallback((data) => {
+    if (data && data.symbol && data.price !== undefined) {
+      setRealtimePrices((prev) => ({
+        ...prev,
+        [data.symbol]: data.price,
+      }));
+    }
+  }, []));
 
   const handleRemove = (stockId) => {
     dispatch(removeWatchlist(stockId));
@@ -56,7 +68,15 @@ export default function Watchlist() {
           </div>
         ) : (
           <div className="space-y-3">
-            {items.map((item) => (
+            {items.map((item) => {
+              const livePrice = realtimePrices[item.symbol]
+              const prevClose = item.price != null && item.change_percent != null
+                ? item.price / (1 + item.change_percent / 100)
+                : null
+              const liveChange = livePrice != null && prevClose
+                ? ((livePrice - prevClose) / prevClose) * 100
+                : item.change_percent
+              return (
               <div
                 key={item.id}
                 className="bg-base-200 rounded-xl p-4 border border-base-300 flex items-center justify-between"
@@ -73,9 +93,9 @@ export default function Watchlist() {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className="font-mono font-semibold text-white">
-                      {formatPrice(item.price)}
+                      {formatPrice(livePrice ?? item.price)}
                     </p>
-                    <PriceChange value={item.change_percent} />
+                    <PriceChange value={liveChange} />
                   </div>
                   <button
                     onClick={() => handleRemove(item.stock_id)}
@@ -96,7 +116,8 @@ export default function Watchlist() {
                   </button>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

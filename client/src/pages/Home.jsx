@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchMovers } from '../features/stocks/stocksSlice';
+import { useSocket } from '../hooks/useSocket';
 import StockCard from '../components/StockCard';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import ErrorState from '../components/ErrorState';
@@ -9,10 +10,21 @@ import ErrorState from '../components/ErrorState';
 export default function Home() {
   const dispatch = useDispatch();
   const { movers, loading, error } = useSelector((state) => state.stocks);
+  const [realtimePrices, setRealtimePrices] = useState({});
 
   useEffect(() => {
     dispatch(fetchMovers());
   }, [dispatch]);
+
+  // Harga live (broadcast global 'price-update' dari server) untuk card gainers/losers.
+  useSocket('price-update', useCallback((data) => {
+    if (data && data.symbol && data.price !== undefined) {
+      setRealtimePrices((prev) => ({
+        ...prev,
+        [data.symbol]: data.price,
+      }));
+    }
+  }, []));
 
   return (
     <div className="min-h-screen">
@@ -78,7 +90,11 @@ export default function Home() {
                         sector: stock.sector,
                         price: stock.price,
                         change: stock.change_percent,
+                        previousClose: stock.price != null && stock.change_percent != null
+                          ? stock.price / (1 + stock.change_percent / 100)
+                          : undefined,
                       }}
+                      realtimePrice={realtimePrices[stock.symbol]}
                     />
                   ))}
                 </div>
@@ -100,7 +116,11 @@ export default function Home() {
                         sector: stock.sector,
                         price: stock.price,
                         change: stock.change_percent,
+                        previousClose: stock.price != null && stock.change_percent != null
+                          ? stock.price / (1 + stock.change_percent / 100)
+                          : undefined,
                       }}
+                      realtimePrice={realtimePrices[stock.symbol]}
                     />
                   ))}
                 </div>
