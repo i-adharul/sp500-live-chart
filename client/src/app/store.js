@@ -8,5 +8,5 @@ export default configureStore({
     stocks: stocksReducer,
     auth: authReducer,
     watchlist: watchlistReducer,
-  },
+  }
 });
