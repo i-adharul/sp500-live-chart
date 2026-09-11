@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: light --default;
+}
+
+@layer base {
+  :root {
+    --color-stock-up: #22c55e;
+    --color-stock-down: #ef4444;
+  }
+
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.3);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, 0.5);
+  }
+
+  /* Light theme overrides - convert dark-theme colors to light */
+  .text-white {
+    color: #1f2937 !important; /* gray-800 */
+  }
+
+  .text-emerald-400 {
+    color: #059669 !important; /* emerald-600 */
+  }
+
+  .text-amber-400\/90 {
+    color: #d97706 !important; /* amber-600 */
+  }
+
+  .text-violet-400 {
+    color: #7c3aed !important; /* violet-600 */
+  }
+
+  .text-red-400 {
+    color: #dc2626 !important; /* red-600 */
+  }
+}
