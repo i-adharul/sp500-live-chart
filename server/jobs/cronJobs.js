@@ -140,10 +140,10 @@ const cleanupCandlesJob = async () => {
 };
 
 const startCronJobs = () => {
-  cron.schedule('*/4 * * * *', updateQuotesJob);
-  cron.schedule('0 21 * * *', updateCandlesJob);
-  cron.schedule('0 */4 * * *', updateNewsJob);
-  cron.schedule('0 2 * * *', cleanupCandlesJob);
+  cron.schedule('*/4 * * * *', updateQuotesJob); // tiap 4 menit
+  cron.schedule('0 21 * * *', updateCandlesJob); // tiap hari jam 21:00
+  cron.schedule('0 */4 * * *', updateNewsJob); // tiap 4 jam, di menit ke-0 (00:00, 04:00, 08:00, 12:00, 16:00, 20:00)
+  cron.schedule('0 2 * * *', cleanupCandlesJob); // tiap hari jam 02:00
 
   console.log('[Cron] All cron jobs scheduled.');
 };

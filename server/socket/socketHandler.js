@@ -82,12 +82,20 @@ const handleTradeUpdate = async (trade) => {
     setTimeout(() => {
       const candle = liveCandles.get(symbol);
       if (candle && io) {
+        // Chart detail (per room simbol) — OHLC lengkap.
         io.to(symbol).emit('candle-update', {
           symbol,
           open: candle.open,
           high: candle.high,
           low: candle.low,
           close: candle.close,
+          timestamp: candle.timestamp,
+        });
+        // Card harga (broadcast global) — didengar Stocks/Home/Watchlist.
+        // Client yang filter per simbol via realtimePrices[symbol].
+        io.emit('price-update', {
+          symbol,
+          price: candle.close,
           timestamp: candle.timestamp,
         });
       }
